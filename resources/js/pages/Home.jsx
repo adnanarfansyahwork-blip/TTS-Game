@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import themeManager from '../lib/theme';
 
 export default function Home() {
     const [puzzles, setPuzzles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const [darkMode, setDarkMode] = useState(themeManager.isDark());
     const navigate = useNavigate();
+
+    const toggleDarkMode = () => {
+        const newState = themeManager.toggle();
+        setDarkMode(newState);
+    };
 
     useEffect(() => {
         // Cleanup old localStorage key (migration from old version)
@@ -94,6 +101,13 @@ export default function Home() {
                     </div>
 
                     <div className="hp-auth">
+                        <button 
+                            className="hp-theme-btn" 
+                            onClick={toggleDarkMode}
+                            title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                        >
+                            {darkMode ? '☀️' : '🌙'}
+                        </button>
                         {user ? (
                             <>
                                 <span className="hp-user-name">Hai, {user.name.split(' ')[0]}!</span>
@@ -192,6 +206,24 @@ export default function Home() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
 
+                /* ===== CSS VARIABLES FOR THEMING ===== */
+                :root {
+                    --bg-gradient: linear-gradient(180deg, #5BA3D9 0%, #7EC8E3 25%, #ADE4C0 50%, #8BBF6A 70%, #5A9E3E 90%, #3D7A28 100%);
+                    --card-bg: rgba(255,255,255,0.95);
+                    --card-shadow: rgba(0,0,0,0.1);
+                    --text-primary: #2D3748;
+                    --text-secondary: #718096;
+                    --node-locked-bg: linear-gradient(135deg,#9CA3AF,#6B7280);
+                }
+                [data-theme="dark"] {
+                    --bg-gradient: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0f0f23 100%);
+                    --card-bg: rgba(30,30,50,0.95);
+                    --card-shadow: rgba(0,0,0,0.4);
+                    --text-primary: #E2E8F0;
+                    --text-secondary: #A0AEC0;
+                    --node-locked-bg: linear-gradient(135deg,#4A5568,#2D3748);
+                }
+
                 .hp-page {
                     position: fixed; inset: 0;
                     font-family: 'Nunito', sans-serif;
@@ -203,7 +235,8 @@ export default function Home() {
                 .hp-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
                 .hp-bg-sky {
                     position: absolute; inset: 0;
-                    background: linear-gradient(180deg, #5BA3D9 0%, #7EC8E3 25%, #ADE4C0 50%, #8BBF6A 70%, #5A9E3E 90%, #3D7A28 100%);
+                    background: var(--bg-gradient);
+                    transition: background 0.3s ease;
                 }
                 .hp-bg-sun {
                     position: absolute; top: 3%; right: 10%;
@@ -223,10 +256,24 @@ export default function Home() {
                 .hp-bg-meadow {
                     position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
                     background: linear-gradient(180deg, transparent 0%, rgba(90,130,50,0.5) 35%, rgba(70,115,40,0.85) 100%);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .hp-bg-meadow {
+                    background: linear-gradient(180deg, transparent 0%, rgba(20,30,40,0.5) 35%, rgba(15,25,35,0.85) 100%);
                 }
                 .hp-bg-grass {
                     position: absolute; bottom: 0; left: 0; right: 0; height: 25%;
                     background: linear-gradient(180deg, rgba(60,110,40,0.8) 0%, rgba(40,85,25,1) 100%);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .hp-bg-grass {
+                    background: linear-gradient(180deg, rgba(20,30,40,0.8) 0%, rgba(10,15,20,1) 100%);
+                }
+                [data-theme="dark"] .hp-bg-sun {
+                    background: radial-gradient(circle, rgba(150,150,200,0.3) 0%, rgba(100,100,150,0.15) 40%, transparent 65%);
+                }
+                [data-theme="dark"] .hp-bg-cloud {
+                    background: rgba(100,100,150,0.2);
                 }
                 .hp-particle {
                     position: absolute; width: 5px; height: 5px;
@@ -268,6 +315,17 @@ export default function Home() {
                     letter-spacing: -0.5px;
                 }
                 .hp-auth { display: flex; gap: 6px; align-items: center; }
+                .hp-theme-btn {
+                    width: 32px; height: 32px;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+                    cursor: pointer; font-size: 0.95rem;
+                    transition: all 0.2s;
+                    backdrop-filter: blur(4px);
+                }
+                .hp-theme-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.3); }
+                .hp-theme-btn:active { transform: scale(0.95); }
                 .hp-user-name {
                     font-weight: 700; font-size: 0.75rem; color: rgba(255,255,255,0.85);
                     margin-right: 4px;
@@ -379,6 +437,10 @@ export default function Home() {
                     cursor: not-allowed; opacity: 0.7;
                     backdrop-filter: blur(4px);
                 }
+                [data-theme="dark"] .hp-node.locked {
+                    background: rgba(50,50,80,0.5);
+                    border-color: rgba(100,100,150,0.3);
+                }
                 .hp-node:hover:not(.locked) {
                     transform: scale(1.12);
                 }
@@ -400,22 +462,28 @@ export default function Home() {
                 .hp-level-label {
                     display: flex; align-items: center; gap: 5px;
                     padding: 6px 14px;
-                    background: rgba(255,255,255,0.85);
+                    background: var(--card-bg);
                     backdrop-filter: blur(8px);
                     border-radius: 12px;
                     max-width: 180px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                    box-shadow: 0 2px 10px var(--card-shadow);
                     border: 1.5px solid rgba(255,255,255,0.9);
+                    transition: all 0.3s ease;
                 }
                 .hp-level-label.locked {
                     background: rgba(255,255,255,0.35);
                     border-color: rgba(255,255,255,0.2);
                 }
+                [data-theme="dark"] .hp-level-label.locked {
+                    background: rgba(30,30,50,0.5);
+                    border-color: rgba(255,255,255,0.1);
+                }
                 .hp-label-title {
                     font-weight: 700; font-size: 0.72rem;
-                    color: #2D3748; line-height: 1.3;
+                    color: var(--text-primary); line-height: 1.3;
                     overflow: hidden; text-overflow: ellipsis;
                     white-space: nowrap;
+                    transition: color 0.3s ease;
                 }
                 .hp-level-label.locked .hp-label-title { color: rgba(255,255,255,0.6); }
                 .hp-label-check {

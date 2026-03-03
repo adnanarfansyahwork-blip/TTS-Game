@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import soundManager from '../lib/sounds';
+import themeManager from '../lib/theme';
 
 export default function Player() {
     const { level } = useParams();
@@ -8,6 +10,8 @@ export default function Player() {
     const [puzzle, setPuzzle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [completedWords, setCompletedWords] = useState([]);
+    const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
+    const [darkMode, setDarkMode] = useState(themeManager.isDark());
     const [solved, setSolved] = useState(false);
 
     const [isSwiping, setIsSwiping] = useState(false);
@@ -154,6 +158,7 @@ export default function Player() {
                 const letter = e.key.toUpperCase();
                 const key = `${x},${y}`;
                 setTypedLetters(prev => ({ ...prev, [key]: letter }));
+                soundManager.playType();
                 // Auto-advance
                 const dx = inputDirection === 'across' ? 1 : 0;
                 const dy = inputDirection === 'down' ? 1 : 0;
@@ -206,6 +211,7 @@ export default function Player() {
             }
             if (allMatch) {
                 setCompletedWords(prev => [...prev, w.word]);
+                soundManager.playCorrect();
                 setShowCorrect(true);
                 setTimeout(() => setShowCorrect(false), 800);
             }
@@ -230,6 +236,7 @@ export default function Player() {
 
     const handleWin = async () => {
         setSolved(true);
+        soundManager.playWin();
         const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
         const token = localStorage.getItem('auth_token') || localStorage.getItem('admin_token');
@@ -307,11 +314,13 @@ export default function Player() {
     const shuffleLetters = () => {
         setWheelLetters(prev => [...prev].sort(() => Math.random() - 0.5));
         setShuffleKey(prev => prev + 1);
+        soundManager.playShuffle();
     };
 
     const useHint = async () => {
         if (solved) return;
         if (hintsRemaining <= 0) {
+            soundManager.playError();
             alert('Maximum hints reached (2/2) for this level!');
             return;
         }
@@ -349,6 +358,7 @@ export default function Player() {
             setHintedCells(prev => [...prev, rand]);
             setHintsUsed(prev => prev + 1);
             setHintsRemaining(prev => prev - 1);
+            soundManager.playHint();
         }
     };
 
@@ -460,15 +470,38 @@ export default function Player() {
                         Level {puzzle.level}
                     </div>
 
-                    <button 
-                        className={`cq-hint-btn ${hintsRemaining <= 0 ? 'disabled' : ''}`} 
-                        onClick={useHint}
-                        disabled={hintsRemaining <= 0}
-                        title={`Hints: ${hintsRemaining}/${maxHints}`}
-                    >
-                        💡
-                        <span className="hint-badge">{hintsRemaining}</span>
-                    </button>
+                    <div className="cq-header-btns">
+                        <button 
+                            className="cq-theme-btn"
+                            onClick={() => {
+                                const newState = themeManager.toggle();
+                                setDarkMode(newState);
+                            }}
+                            title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                        >
+                            {darkMode ? '☀️' : '🌙'}
+                        </button>
+                        <button 
+                            className="cq-sound-btn"
+                            onClick={() => {
+                                const newState = soundManager.toggle();
+                                setSoundEnabled(newState);
+                                if (newState) soundManager.playClick();
+                            }}
+                            title={soundEnabled ? 'Sound On' : 'Sound Off'}
+                        >
+                            {soundEnabled ? '🔊' : '🔇'}
+                        </button>
+                        <button 
+                            className={`cq-hint-btn ${hintsRemaining <= 0 ? 'disabled' : ''}`} 
+                            onClick={useHint}
+                            disabled={hintsRemaining <= 0}
+                            title={`Hints: ${hintsRemaining}/${maxHints}`}
+                        >
+                            💡
+                            <span className="hint-badge">{hintsRemaining}</span>
+                        </button>
+                    </div>
                 </header>
 
                 {/* ===== CLUE ===== */}
@@ -668,6 +701,22 @@ export default function Player() {
                             <Link to={`/play/${parseInt(level) + 1}`} className="cq-win-btn">
                                 Lanjut Level →
                             </Link>
+                            <div className="cq-win-actions">
+                                <button className="cq-replay-btn" onClick={() => window.location.reload()}>
+                                    🔄 Main Ulang
+                                </button>
+                                <button className="cq-share-btn" onClick={() => {
+                                    const text = `🎮 TTS Quest - Level ${level} selesai!\n⏱️ Waktu: ${Math.floor((Date.now() - startTimeRef.current) / 1000)} detik\n💡 Hints: ${hintsUsed}/2\n${result ? `🏆 Score: ${result.score}` : ''}\n\nMain juga yuk!`;
+                                    if (navigator.share) {
+                                        navigator.share({ title: 'TTS Quest', text });
+                                    } else {
+                                        navigator.clipboard.writeText(text);
+                                        alert('Copied to clipboard! 📋');
+                                    }
+                                }}>
+                                    📤 Share
+                                </button>
+                            </div>
                             <Link to="/" className="cq-home-link">
                                 Kembali ke Menu
                             </Link>
@@ -694,33 +743,56 @@ export default function Player() {
                 .cq-bg-sky {
                     position: absolute; inset: 0;
                     background: linear-gradient(180deg, #7EC8E3 0%, #ADE4C0 40%, #8BBF6A 65%, #5A9E3E 85%, #3D7A28 100%);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .cq-bg-sky {
+                    background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0f0f23 100%);
                 }
                 .cq-bg-sun {
                     position: absolute; top: 4%; right: 12%;
                     width: 90px; height: 90px;
                     background: radial-gradient(circle, rgba(255,250,200,0.95) 0%, rgba(255,220,100,0.5) 35%, transparent 65%);
                     border-radius: 50%;
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .cq-bg-sun {
+                    background: radial-gradient(circle, rgba(150,150,200,0.3) 0%, rgba(100,100,150,0.15) 40%, transparent 65%);
                 }
                 .cq-bg-cloud {
                     position: absolute;
                     background: rgba(255,255,255,0.55);
                     border-radius: 100px;
                     filter: blur(3px);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .cq-bg-cloud {
+                    background: rgba(100,100,150,0.2);
                 }
                 .cq-cloud-1 { top: 7%; left: 3%; width: 110px; height: 30px; animation: drift 35s linear infinite; }
                 .cq-cloud-2 { top: 14%; right: 5%; width: 80px; height: 22px; animation: drift 45s linear infinite reverse; }
                 .cq-bg-meadow {
                     position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
                     background: linear-gradient(180deg, transparent 0%, rgba(90,130,50,0.5) 30%, rgba(70,115,40,0.85) 100%);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .cq-bg-meadow {
+                    background: linear-gradient(180deg, transparent 0%, rgba(20,30,40,0.5) 30%, rgba(15,25,35,0.85) 100%);
                 }
                 .cq-bg-grass {
                     position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
                     background: linear-gradient(180deg, rgba(60,110,40,0.8) 0%, rgba(40,85,25,1) 100%);
+                    transition: background 0.3s ease;
+                }
+                [data-theme="dark"] .cq-bg-grass {
+                    background: linear-gradient(180deg, rgba(20,30,40,0.8) 0%, rgba(10,15,20,1) 100%);
                 }
                 .cq-particle {
                     position: absolute; width: 5px; height: 5px;
                     background: rgba(255,255,200,0.7); border-radius: 50%;
                     animation: pFloat 10s ease-in-out infinite;
+                }
+                [data-theme="dark"] .cq-particle {
+                    background: rgba(150,150,200,0.4);
                 }
                 .cq-p1 { top: 30%; left: 18%; }
                 .cq-p2 { top: 42%; left: 65%; animation-delay: 2s; width: 4px; height: 4px; }
@@ -829,6 +901,13 @@ export default function Player() {
                     line-height: 1.35;
                     box-shadow: 0 3px 15px rgba(0,0,0,0.1);
                     border: 2px solid rgba(255,255,255,0.9);
+                    transition: all 0.3s ease;
+                }
+                [data-theme="dark"] .cq-clue-strip .cq-clue-text {
+                    background: rgba(30,30,50,0.9);
+                    color: #E2E8F0;
+                    border-color: rgba(100,100,150,0.3);
+                    box-shadow: 0 3px 15px rgba(0,0,0,0.3);
                 }
                 .cq-clue-dots {
                     display: flex; justify-content: center; gap: 5px; margin-top: 5px;
@@ -1045,6 +1124,11 @@ export default function Player() {
                     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
                     animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                     border: 3px solid rgba(255,255,255,0.8);
+                    transition: all 0.3s ease;
+                }
+                [data-theme="dark"] .cq-win-card {
+                    background: linear-gradient(150deg, #1e1e32, #252540);
+                    border-color: rgba(100,100,150,0.3);
                 }
                 .cq-win-stars { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; }
                 .cq-star {
@@ -1052,17 +1136,23 @@ export default function Player() {
                     animation: starPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
                     filter: drop-shadow(0 2px 5px rgba(245,158,11,0.4));
                 }
-                .cq-win-title { font-size: 1.5rem; font-weight: 900; color: #2D3748; margin: 0 0 2px; }
-                .cq-win-sub { font-size: 0.8rem; color: #718096; margin: 0 0 16px; font-weight: 600; }
+                .cq-win-title { font-size: 1.5rem; font-weight: 900; color: #2D3748; margin: 0 0 2px; transition: color 0.3s; }
+                [data-theme="dark"] .cq-win-title { color: #E2E8F0; }
+                .cq-win-sub { font-size: 0.8rem; color: #718096; margin: 0 0 16px; font-weight: 600; transition: color 0.3s; }
+                [data-theme="dark"] .cq-win-sub { color: #A0AEC0; }
                 .cq-win-stats {
                     display: flex; align-items: center; justify-content: center;
                     gap: 20px; margin-bottom: 20px; padding: 10px;
                     background: rgba(0,0,0,0.03); border-radius: 14px;
+                    transition: background 0.3s;
                 }
+                [data-theme="dark"] .cq-win-stats { background: rgba(255,255,255,0.05); }
                 .cq-win-stat { text-align: center; }
-                .cq-stat-val { display: block; font-size: 1.2rem; font-weight: 900; color: #2D3748; }
+                .cq-stat-val { display: block; font-size: 1.2rem; font-weight: 900; color: #2D3748; transition: color 0.3s; }
+                [data-theme="dark"] .cq-stat-val { color: #E2E8F0; }
                 .cq-stat-lbl { font-size: 0.6rem; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
-                .cq-win-divider { width: 1px; height: 35px; background: rgba(0,0,0,0.08); }
+                .cq-win-divider { width: 1px; height: 35px; background: rgba(0,0,0,0.08); transition: background 0.3s; }
+                [data-theme="dark"] .cq-win-divider { background: rgba(255,255,255,0.1); }
                 .cq-win-btn {
                     display: block; width: 100%; padding: 13px;
                     background: linear-gradient(135deg, #4CAF50, #2E7D32);
@@ -1082,6 +1172,77 @@ export default function Player() {
                     transition: color 0.2s;
                 }
                 .cq-home-link:hover { color: #4A5568; }
+                [data-theme="dark"] .cq-home-link { color: #A0AEC0; }
+                [data-theme="dark"] .cq-home-link:hover { color: #CBD5E0; }
+
+                /* ===== HEADER BUTTONS ===== */
+                .cq-header-btns {
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .cq-sound-btn {
+                    width: 32px; height: 32px;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(255,255,255,0.9);
+                    border-radius: 50%; border: 2px solid rgba(0,0,0,0.1);
+                    cursor: pointer; font-size: 0.9rem;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    transition: all 0.2s;
+                }
+                [data-theme="dark"] .cq-sound-btn {
+                    background: rgba(50,50,80,0.9);
+                    border-color: rgba(100,100,150,0.3);
+                }
+                .cq-sound-btn:hover { transform: scale(1.08); }
+                .cq-sound-btn:active { transform: scale(0.92); }
+                .cq-theme-btn {
+                    width: 32px; height: 32px;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(255,255,255,0.9);
+                    border-radius: 50%; border: 2px solid rgba(0,0,0,0.1);
+                    cursor: pointer; font-size: 0.9rem;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    transition: all 0.2s;
+                }
+                [data-theme="dark"] .cq-theme-btn {
+                    background: rgba(50,50,80,0.9);
+                    border-color: rgba(100,100,150,0.3);
+                }
+                .cq-theme-btn:hover { transform: scale(1.08); }
+                .cq-theme-btn:active { transform: scale(0.92); }
+
+                /* ===== WIN ACTIONS ===== */
+                .cq-win-actions {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: center;
+                    margin-top: 12px;
+                }
+                .cq-replay-btn, .cq-share-btn {
+                    padding: 8px 16px;
+                    border-radius: 12px;
+                    border: none;
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .cq-replay-btn {
+                    background: linear-gradient(135deg, #F59E0B, #D97706);
+                    color: white;
+                    box-shadow: 0 3px 10px rgba(245,158,11,0.35);
+                }
+                .cq-replay-btn:hover { transform: translateY(-2px); }
+                .cq-share-btn {
+                    background: linear-gradient(135deg, #3B82F6, #2563EB);
+                    color: white;
+                    box-shadow: 0 3px 10px rgba(59,130,246,0.35);
+                }
+                .cq-share-btn:hover { transform: translateY(-2px); }
 
                 /* ===== LOADING ===== */
                 .cq-loading {
