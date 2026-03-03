@@ -42,6 +42,7 @@ export default function Admin() {
     const [error, setError] = useState(null);
     const [gridData, setGridData] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [editingId, setEditingId] = useState(null);
 
     // ===== HISTORY TAB STATE =====
     const [puzzles, setPuzzles] = useState([]);
@@ -96,12 +97,21 @@ export default function Admin() {
         setIsSaving(true);
         const token = localStorage.getItem('admin_token');
         try {
-            await axios.post('/api/puzzles', {
-                title, level, words: gridData.words, grid: gridData.grid
-            }, { headers: { Authorization: `Bearer ${token}` } });
-            alert('Puzzle berhasil dipublish! 🎉');
+            const payload = { title, level, words: gridData.words, grid: gridData.grid };
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
+            if (editingId) {
+                await axios.put(`/api/puzzles/${editingId}`, payload, config);
+                alert('Puzzle berhasil diperbarui! 🎉');
+            } else {
+                await axios.post('/api/puzzles', payload, config);
+                alert('Puzzle berhasil dipublish! 🎉');
+            }
+
             setGridData(null);
             setTitle('');
+            setLevel(1);
+            setEditingId(null);
             setItems([{ word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }]);
             fetchHistory();
             setActiveTab('history');
@@ -109,6 +119,50 @@ export default function Admin() {
             setError(err.response?.data?.message || 'Gagal menyimpan. Coba login ulang.');
             if (err.response?.status === 401) { localStorage.removeItem('admin_token'); navigate('/login'); }
         } finally { setIsSaving(false); }
+    };
+
+    const handleEdit = async (puzzleId) => {
+        try {
+            const token = localStorage.getItem('admin_token');
+            const res = await axios.get(`/api/puzzles/${puzzleId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const p = res.data;
+
+            setEditingId(p.id);
+            setTitle(p.title);
+            setLevel(p.level);
+
+            // Reconstruct items from words
+            const loadedItems = p.words.map(w => ({ word: w.word, clue: w.clue }));
+            while (loadedItems.length < 5) loadedItems.push({ word: '', clue: '' });
+            setItems(loadedItems);
+
+            // Set gridData for preview
+            setGridData({ width: p.grid[0].length, height: p.grid.length, words: p.words, grid: p.grid });
+
+            setActiveTab('create');
+        } catch (err) {
+            alert('Gagal memuat data puzzle.');
+        }
+    };
+
+    const handleDelete = async (puzzleId) => {
+        if (!window.confirm('Yakin ingin menghapus puzzle ini?')) return;
+        try {
+            const token = localStorage.getItem('admin_token');
+            await axios.delete(`/api/puzzles/${puzzleId}`, { headers: { Authorization: `Bearer ${token}` } });
+            alert('Puzzle terhapus.');
+            fetchHistory();
+        } catch (err) {
+            alert('Gagal menghapus puzzle.');
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setTitle('');
+        setLevel(1);
+        setItems([{ word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }, { word: '', clue: '' }]);
+        setGridData(null);
     };
 
     const handleLogout = async () => {
@@ -245,8 +299,13 @@ export default function Admin() {
 
                                     <p className="adm-success">✓ {gridData.words.length} kata berhasil di-generate</p>
                                     <button onClick={handlePublish} disabled={isSaving} className="adm-publish-btn">
-                                        {isSaving ? 'Menyimpan...' : '🚀 Publish Puzzle'}
+                                        {isSaving ? 'Menyimpan...' : (editingId ? '💾 Simpan Perubahan' : '🚀 Publish Puzzle')}
                                     </button>
+                                    {editingId && (
+                                        <button onClick={handleCancelEdit} disabled={isSaving} className="adm-cancel-btn" style={{ marginTop: '10px' }}>
+                                            ✕ Batal Edit
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="adm-preview-empty">
@@ -279,6 +338,8 @@ export default function Admin() {
                                             <div className="adm-hi-date">{new Date(p.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                                         </div>
                                         <div className="adm-hi-actions">
+                                            <button onClick={() => handleEdit(p.id)} className="adm-hi-btn adm-hi-edit">✏️ Edit</button>
+                                            <button onClick={() => handleDelete(p.id)} className="adm-hi-btn adm-hi-del">🗑️ Hapus</button>
                                             <Link to={`/play/${p.level}`} className="adm-hi-btn adm-hi-play">▶ Main</Link>
                                         </div>
                                     </div>
@@ -390,6 +451,12 @@ export default function Admin() {
                 .adm-hi-btn { padding: 6px 12px; border-radius: 10px; border: none; font-family: 'Nunito'; font-weight: 800; font-size: 0.68rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
                 .adm-hi-play { background: #10B981; color: #fff; }
                 .adm-hi-play:hover { background: #059669; }
+                .adm-hi-edit { background: #3B82F6; color: #fff; }
+                .adm-hi-edit:hover { background: #2563EB; }
+                .adm-hi-del { background: #EF4444; color: #fff; }
+                .adm-hi-del:hover { background: #DC2626; }
+                .adm-cancel-btn { width: 100%; padding: 12px; background: #FFF; border-radius: 14px; border: 2px solid #EF4444; color: #EF4444; font-family: 'Nunito'; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+                .adm-cancel-btn:hover { background: #FEF2F2; }
                 @keyframes admRowIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
                 @media (max-width: 700px) {

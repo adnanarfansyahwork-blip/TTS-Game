@@ -50,4 +50,28 @@ class PuzzleController extends Controller
 
         return response()->json($puzzle, 201);
     }
+
+    public function update(Request $request, $id)
+    {
+        $puzzle = Puzzle::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'level' => 'required|integer|unique:puzzles,level,' . $puzzle->id,
+            'words' => 'required|array',
+            'grid' => 'required|array',
+        ]);
+
+        $puzzle->update($validated);
+
+        return response()->json($puzzle, 200);
+    }
+
+    public function destroy($id)
+    {
+        $puzzle = Puzzle::findOrFail($id);
+        $puzzle->delete();
+
+        return response()->json(['message' => 'Puzzle deleted successfully'], 200);
+    }
 }

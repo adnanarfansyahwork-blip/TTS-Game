@@ -43,4 +43,18 @@ Route::middleware('auth:sanctum')->group(function () {
         }
         return app(PuzzleController::class)->store($request);
     });
+
+    Route::put('/puzzles/{id}', function (Request $request, $id) {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        }
+        return app(PuzzleController::class)->update($request, $id);
+    });
+
+    Route::delete('/puzzles/{id}', function (Request $request, $id) {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        }
+        return app(PuzzleController::class)->destroy($id);
+    });
 });

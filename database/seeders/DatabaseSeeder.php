@@ -33,16 +33,17 @@ class DatabaseSeeder extends Seeder
             'level' => 1,
             'is_published' => true,
             'words' => [
-                ['id' => 1, 'number' => 1, 'word' => 'ASPAL', 'clue' => 'Ada di pinggir jalan? (Gampang bgt)', 'direction' => 'across', 'nx' => 0, 'ny' => 0],
-                ['id' => 2, 'number' => 2, 'word' => 'PINTU', 'clue' => 'Kalo mau masuk rumah lewat?', 'direction' => 'down', 'nx' => 2, 'ny' => -2],
-                ['id' => 3, 'number' => 3, 'word' => 'MALAM', 'clue' => 'Setelah sore adalah...', 'direction' => 'across', 'nx' => 2, 'ny' => 2]
+                ['id' => 1, 'number' => 1, 'word' => 'MALAM', 'clue' => 'Setelah sore adalah...', 'direction' => 'down', 'nx' => 0, 'ny' => 0],
+                ['id' => 2, 'number' => 2, 'word' => 'ASPAL', 'clue' => 'Ada di pinggir jalan? (Gampang bgt)', 'direction' => 'across', 'nx' => 0, 'ny' => 1],
+                ['id' => 3, 'number' => 3, 'word' => 'PINTU', 'clue' => 'Kalo mau masuk rumah lewat?', 'direction' => 'down', 'nx' => 2, 'ny' => 1]
             ],
             'grid' => [
-                [null, null, ['letter' => 'P', 'belongsTo' => [['id' => 2, 'dir' => 'down']], 'isStart' => true, 'startLabel' => 2]],
-                [null, null, ['letter' => 'I', 'belongsTo' => [['id' => 2, 'dir' => 'down']], 'isStart' => false]],
-                [['letter' => 'A', 'belongsTo' => [['id' => 1, 'dir' => 'across']], 'isStart' => true, 'startLabel' => 1], ['letter' => 'S', 'belongsTo' => [['id' => 1, 'dir' => 'across']], 'isStart' => false], ['letter' => 'P', 'belongsTo' => [['id' => 1, 'dir' => 'across'], ['id' => 2, 'dir' => 'down']], 'isStart' => false], ['letter' => 'A', 'belongsTo' => [['id' => 1, 'dir' => 'across']], 'isStart' => false], ['letter' => 'L', 'belongsTo' => [['id' => 1, 'dir' => 'across']], 'isStart' => false]],
-                [null, null, ['letter' => 'A', 'belongsTo' => [['id' => 2, 'dir' => 'down']], 'isStart' => false]],
-                [null, null, ['letter' => 'L', 'belongsTo' => [['id' => 2, 'dir' => 'down'], ['id' => 3, 'dir' => 'across']], 'isStart' => true, 'startLabel' => 3], ['letter' => 'A', 'belongsTo' => [['id' => 3, 'dir' => 'across']], 'isStart' => false], ['letter' => 'M', 'belongsTo' => [['id' => 3, 'dir' => 'across']], 'isStart' => false]],
+                [['letter' => 'M', 'belongsTo' => [['id' => 1, 'dir' => 'down']], 'isStart' => true, 'startLabel' => 1], null, null, null, null],
+                [['letter' => 'A', 'belongsTo' => [['id' => 1, 'dir' => 'down'], ['id' => 2, 'dir' => 'across']], 'isStart' => true, 'startLabel' => 2], ['letter' => 'S', 'belongsTo' => [['id' => 2, 'dir' => 'across']], 'isStart' => false], ['letter' => 'P', 'belongsTo' => [['id' => 2, 'dir' => 'across'], ['id' => 3, 'dir' => 'down']], 'isStart' => true, 'startLabel' => 3], ['letter' => 'A', 'belongsTo' => [['id' => 2, 'dir' => 'across']], 'isStart' => false], ['letter' => 'L', 'belongsTo' => [['id' => 2, 'dir' => 'across']], 'isStart' => false]],
+                [['letter' => 'L', 'belongsTo' => [['id' => 1, 'dir' => 'down']], 'isStart' => false], null, ['letter' => 'I', 'belongsTo' => [['id' => 3, 'dir' => 'down']], 'isStart' => false], null, null],
+                [['letter' => 'A', 'belongsTo' => [['id' => 1, 'dir' => 'down']], 'isStart' => false], null, ['letter' => 'N', 'belongsTo' => [['id' => 3, 'dir' => 'down']], 'isStart' => false], null, null],
+                [['letter' => 'M', 'belongsTo' => [['id' => 1, 'dir' => 'down']], 'isStart' => false], null, ['letter' => 'T', 'belongsTo' => [['id' => 3, 'dir' => 'down']], 'isStart' => false], null, null],
+                [null, null, ['letter' => 'U', 'belongsTo' => [['id' => 3, 'dir' => 'down']], 'isStart' => false], null, null]
             ]
         ]);
 
