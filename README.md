@@ -60,15 +60,23 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 
 ## 🎬 Video Demo
 
+### 📦 Video Instalasi
 <div align="center">
-  <a href="https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/preview">
-    <img src="https://drive.google.com/thumbnail?id=1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o&sz=w800" alt="Video Demo TTS Quest" width="70%"/>
-    <br/>
-    <img src="https://img.shields.io/badge/▶️_Klik_untuk_Tonton_Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/>
+  <a href="https://drive.google.com/file/d/1Eu26PJ-JyFggk4p-T1kExk_bxs1Y6PGj/preview">
+    <img src="https://img.shields.io/badge/▶️_Tonton_Cara_Install-4285F4?style=for-the-badge&logo=googledrive&logoColor=white"/>
   </a>
 </div>
 
-> 📹 **Klik gambar di atas** untuk menonton demo instalasi dan gameplay TTS Quest langsung di browser.
+> Panduan langkah-langkah instalasi project dari awal hingga running.
+
+### 🎮 Video Gameplay
+<div align="center">
+  <a href="https://drive.google.com/file/d/14X6dJ7PdAENsaGWTg0BIhljApHaKQJeL/preview">
+    <img src="https://img.shields.io/badge/▶️_Tonton_Demo_Gameplay-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/>
+  </a>
+</div>
+
+> Demo bermain TTS Quest - fitur swipe, keyboard input, hint system, dan win modal.
 
 ---
 
