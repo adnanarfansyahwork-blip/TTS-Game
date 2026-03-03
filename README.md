@@ -33,10 +33,16 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 - 🗺️ Halaman beranda (*Home*) yang menyajikan roadmap *level selection* interaktif berurut.
 
 ### 4. Extra Feature (Nilai Tambah UI/UX)
-- 💡 **Sistem Bantuan (Hint):** Tombol bohlam untuk menyingkap satu huruf acak.
+- 💡 **Sistem Bantuan (Hint):** Tombol bohlam untuk menyingkap satu huruf acak (dibatasi **2x hint per level**).
 - ⏳ **Stopwatch Timer:** Menghitung total durasi penyelesaian level.
 - 🔄 **Shuffle Wheel:** Tombol untuk mengacak tata letak huruf di roda swipe.
 - 🔐 **Pita Keamanan Role-Based:** Pengguna biasa (Player) terblokir ketat (*HTTP 403*) jika mencoba mengakses endpoint atau page Panel Admin, dicegah sejak lapis Backend Middleware (*Sanctum*).
+- 🔊 **Sound Effects:** Efek suara interaktif menggunakan Web Audio API (tanpa file eksternal) - bunyi saat swipe huruf, jawaban benar, dan level selesai.
+- 🌙 **Dark Mode:** Toggle tema gelap/terang dengan transisi halus, preferensi tersimpan di localStorage.
+- 📤 **Share to Social Media:** Bagikan pencapaian level ke media sosial atau copy ke clipboard dengan URL game.
+- 🔁 **Replay Level:** Tombol untuk mengulang level dari awal setelah menang.
+- 🛡️ **Leaderboard Security:** Validasi server-side untuk mencegah score cheating (verifikasi jawaban, validasi waktu minimum).
+- 👤 **Guest vs User Progress:** Pemisahan sistem progress - tamu menggunakan localStorage, user login menggunakan database.
 
 ---
 
@@ -136,5 +142,7 @@ Project ini mengikuti Standar Monolith SPA Laravel 11 terbaru:
 - `/database/seeders/DatabaseSeeder.php` ➔ Data susunan array matriks awal Grid contoh TTS untuk memperlancar proses testing Anda.
 - `/resources/js/` ➔ **Pusat Frontend React**, berisi pages *SPA*.
 - `/resources/js/lib/crosswordGenerator.js` ➔ **CORE ALGORITHM**. Source code utama dari otak matematis yang mengatur logika intersection (*persinggungan tata letak*) generator papan TTS secara prosedural.
-- `/resources/css/app.css` ➔ Sumber UI/UX (Desain *Grassland/Meadow* kekinian).
+- `/resources/js/lib/sounds.js` ➔ **Sound Manager** menggunakan Web Audio API untuk efek suara programatik.
+- `/resources/js/lib/theme.js` ➔ **Theme Manager** untuk fitur Dark Mode dengan persistensi localStorage.
+- `/resources/css/app.css` ➔ Sumber UI/UX (Desain *Grassland/Meadow* kekinian dengan dukungan Dark Mode).
 - `/ALGORITHM_DOCS.md` ➔ Lembar lampiran khusus yang membahas bedah algoritma `crosswordGenerator.js` dan laporan Bugfix selama development test ini.

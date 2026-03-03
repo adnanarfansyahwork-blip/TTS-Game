@@ -64,3 +64,59 @@ Proyek ini telah dikalibrasi di luar prasyarat standar kelulusan minimum, dibubu
 
 5. **Auto-Select Navigasi Lintas Petak Otomatis yang Halus Fokusnya:**
    Selain konfirmasi kata otomasi pasca ejaan (Golden Alert Colors Animation), kursor seleksi proaktif melangkah ke grid *neighboring cell* tiap ketukan Keyboard fisik di PC, meniru pengalaman TTS majalah teka-teki sesungguhnya—dibimbing tanda sorotan transparan lintas matriks.
+
+6. **Sound Effects (Web Audio API):**
+   Sistem suara programatik menggunakan Web Audio API tanpa memerlukan file audio eksternal. Suara di-generate secara real-time dengan oscillator dan gain node:
+   - `playSelect()` - Bunyi saat memilih huruf di wheel (frequency: 800Hz)
+   - `playCorrect()` - Melodi naik saat kata benar (C5→E5→G5)
+   - `playWin()` - Fanfare kemenangan saat level selesai (C5→E5→G5→C6→E6)
+   - `playHint()` - Notifikasi saat menggunakan hint
+   - `playShuffle()` - Efek acak saat shuffle wheel
+   - Toggle sound on/off dengan preferensi tersimpan di localStorage.
+
+7. **Dark Mode System:**
+   Implementasi tema gelap menggunakan CSS Custom Properties (CSS Variables) dengan transisi halus 0.3s:
+   - Theme Manager singleton (`theme.js`) mengatur `data-theme` attribute pada document.
+   - CSS variables untuk warna background, card, text yang berubah sesuai tema.
+   - Preferensi tersimpan di localStorage key `dark_mode`.
+   - Desain dark mode: gradient biru-ungu gelap (#0f0f23 → #16213e) menggantikan meadow hijau.
+
+8. **Share to Social Media:**
+   Fitur berbagi pencapaian dengan format:
+   ```
+   🎮 TTS Quest - Level X selesai!
+   ⏱️ Waktu: XX detik
+   💡 Hints: X/2
+   🏆 Score: XXXX
+   
+   🔗 Main juga yuk: [URL]
+   ```
+   Menggunakan Web Share API (mobile) dengan fallback ke clipboard (desktop).
+
+9. **Replay Level Button:**
+   Tombol untuk mengulang level dari awal, implementasi sederhana dengan `window.location.reload()`.
+
+---
+
+## 4. Security Enhancements (Pengamanan Lanjutan)
+
+### 🔒 Leaderboard Anti-Cheat System
+- **Problem:** Score bisa dimanipulasi dari client-side tanpa validasi server.
+- **Solusi:**
+  1. **Answer Verification:** Server memverifikasi setiap kata yang dijawab dengan data puzzle asli.
+  2. **Time Validation:** Minimum waktu 3 detik per kata untuk mencegah bot/script.
+  3. **Hint Tracking:** Jumlah hint yang digunakan dilacak di database, bukan dari client.
+
+### 🔒 Hint Limit System
+- **Pembatasan:** Maksimal 2 hint per level per user.
+- **Tracking:** Disimpan di tabel `user_progress` kolom `hints_used`.
+- **API Endpoints:**
+  - `GET /api/hint-status/{puzzleId}` - Cek sisa hint
+  - `POST /api/use-hint` - Gunakan hint (return error jika sudah 2x)
+
+### 🔒 Guest vs Logged-in User Progress Separation
+- **Problem:** Progress guest tercampur dengan user login karena sama-sama pakai localStorage.
+- **Solusi:**
+  - Guest: localStorage key `guest_completed_levels`
+  - Logged-in: Database only (ignore localStorage, clear saat login)
+  - Key `completed_levels` di-cleanup untuk backward compatibility.
