@@ -88,7 +88,15 @@ php artisan key:generate
 ```
 
 **3. Migrasi Database dan Data Awal (Wajib!)**
-Sistem menggunakan Seeder khusus untuk membuat akun *Admin* dan men-generate sampel puzzle *Level 1-3*.
+Sebelum melakukan migrasi, pastikan file database SQLite telah dibuat karena file ini di-ignore oleh Git. Jalankan perintah berikut untuk membuat file database kosong (atau Anda bisa membuat file `database.sqlite` secara manual di dalam folder `database/`):
+```bash
+# Untuk Mac/Linux/Git Bash:
+touch database/database.sqlite
+
+# Untuk Windows (CMD/PowerShell):
+type NUL > database\database.sqlite
+```
+Setelah file database berhasil dibuat, jalankan perintah migrasi beserta Seeder untuk membuat akun *Admin* dan men-generate sampel puzzle *Level 1-3*:
 ```bash
 php artisan migrate:fresh --seed
 ```
