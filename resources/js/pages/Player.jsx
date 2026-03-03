@@ -709,9 +709,10 @@ export default function Player() {
                                     🔄 Main Ulang
                                 </button>
                                 <button className="cq-share-btn" onClick={() => {
-                                    const text = `🎮 TTS Quest - Level ${level} selesai!\n⏱️ Waktu: ${Math.floor((Date.now() - startTimeRef.current) / 1000)} detik\n💡 Hints: ${hintsUsed}/2\n${result ? `🏆 Score: ${result.score}` : ''}\n\nMain juga yuk!`;
+                                    const gameUrl = window.location.origin;
+                                    const text = `🎮 TTS Quest - Level ${level} selesai!\n⏱️ Waktu: ${Math.floor((Date.now() - startTimeRef.current) / 1000)} detik\n💡 Hints: ${hintsUsed}/2\n${result ? `🏆 Score: ${result.score}` : ''}\n\n🔗 Main juga yuk: ${gameUrl}`;
                                     if (navigator.share) {
-                                        navigator.share({ title: 'TTS Quest', text });
+                                        navigator.share({ title: 'TTS Quest', text, url: gameUrl });
                                     } else {
                                         navigator.clipboard.writeText(text);
                                         alert('Copied to clipboard! 📋');
