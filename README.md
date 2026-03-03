@@ -60,9 +60,15 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 
 ## 🎬 Video Demo
 
-[![Video Demo](https://img.shields.io/badge/▶️_Tonton_Video_Demo-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/view?usp=drive_link)
+<div align="center">
+  <a href="https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/preview">
+    <img src="https://drive.google.com/thumbnail?id=1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o&sz=w800" alt="Video Demo TTS Quest" width="70%"/>
+    <br/>
+    <img src="https://img.shields.io/badge/▶️_Klik_untuk_Tonton_Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/>
+  </a>
+</div>
 
-📹 **[Klik di sini untuk menonton video demo](https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/view?usp=drive_link)** - Menampilkan proses instalasi dan gameplay TTS Quest.
+> 📹 **Klik gambar di atas** untuk menonton demo instalasi dan gameplay TTS Quest langsung di browser.
 
 ---
 
