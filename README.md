@@ -60,9 +60,9 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 
 ## 🎬 Video Demo
 
-> 📹 **Video demo tersedia di folder `public/screenshots/demo-video.mp4`** (tidak di-upload ke GitHub karena ukuran file > 100MB).
-> 
-> Untuk melihat demo, clone repository dan buka file video secara lokal, atau hubungi developer untuk link Google Drive/YouTube.
+[![Video Demo](https://img.shields.io/badge/▶️_Tonton_Video_Demo-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/view?usp=drive_link)
+
+📹 **[Klik di sini untuk menonton video demo](https://drive.google.com/file/d/1Hja_8r10KUDw2ZpZZjQwseY83kkxJj5o/view?usp=drive_link)** - Menampilkan proses instalasi dan gameplay TTS Quest.
 
 ---
 
