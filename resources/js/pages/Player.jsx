@@ -277,8 +277,11 @@ export default function Player() {
     };
 
     const startSwipe = (index) => {
+        // Initialize audio context on first user interaction
+        soundManager.initContext();
         setIsSwiping(true);
         setSelectedLetterIndices([index]);
+        soundManager.playSelect();
         if (window.navigator?.vibrate) window.navigator.vibrate(12);
     };
 
@@ -293,6 +296,7 @@ export default function Player() {
             const idx = parseInt(letterIndex);
             if (!selectedLetterIndices.includes(idx)) {
                 setSelectedLetterIndices(prev => [...prev, idx]);
+                soundManager.playSelect();
                 if (window.navigator?.vibrate) window.navigator.vibrate(8);
             }
         }
@@ -486,7 +490,6 @@ export default function Player() {
                             onClick={() => {
                                 const newState = soundManager.toggle();
                                 setSoundEnabled(newState);
-                                if (newState) soundManager.playClick();
                             }}
                             title={soundEnabled ? 'Sound On' : 'Sound Off'}
                         >
