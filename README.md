@@ -132,6 +132,10 @@ php artisan migrate:fresh --seed
 - **Email:** `admin@admin.com`
 - **Password:** `password123`
 
+*Akun User yang digenerate:*
+- **Email:** player@genz.com
+- **Password:** `password123`
+
 **4. Setup Frontend (React / Vite)**
 Pada terminal yang sama (atau tab terminal baru), install library javascript:
 ```bash
