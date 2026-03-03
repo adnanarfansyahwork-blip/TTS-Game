@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/submit-result', [GameController::class, 'submitResult']);
     Route::get('/user-stats', [GameController::class, 'getUserStats']);
+    Route::get('/hint-status/{puzzleId}', [GameController::class, 'getHintStatus']);
+    Route::post('/use-hint', [GameController::class, 'useHint']);
 
     // Check if current user is admin
     Route::get('/check-admin', function (Request $request) {

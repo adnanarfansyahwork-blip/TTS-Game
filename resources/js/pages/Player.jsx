@@ -15,6 +15,8 @@ export default function Player() {
     const [wheelLetters, setWheelLetters] = useState([]);
     const [hintedCells, setHintedCells] = useState([]);
     const [hintsUsed, setHintsUsed] = useState(0);
+    const [maxHints, setMaxHints] = useState(2);
+    const [hintsRemaining, setHintsRemaining] = useState(2);
 
     const [hintIndex, setHintIndex] = useState(0);
     const startTimeRef = useRef(Date.now());
@@ -66,6 +68,21 @@ export default function Player() {
                 });
                 setWheelLetters(wheelChars.sort(() => Math.random() - 0.5));
                 setLoading(false);
+
+                // Fetch hint status if user is logged in
+                if (token) {
+                    axios.get(`/api/hint-status/${res.data.id}`, { headers })
+                        .then(hintRes => {
+                            setHintsUsed(hintRes.data.hints_used);
+                            setHintsRemaining(hintRes.data.hints_remaining);
+                            setMaxHints(hintRes.data.max_hints);
+                        })
+                        .catch(() => {
+                            // If error, use defaults
+                            setHintsUsed(0);
+                            setHintsRemaining(2);
+                        });
+                }
             })
             .catch(err => {
                 console.error(err);
@@ -80,6 +97,7 @@ export default function Player() {
         setTypedLetters({});
         setHintedCells([]);
         setHintsUsed(0);
+        setHintsRemaining(2);
         setHintIndex(0);
         setResult(null);
         setIsSubmitting(false);
@@ -228,13 +246,22 @@ export default function Player() {
         if (token) {
             setIsSubmitting(true);
             try {
+                // Collect all words as answers
+                const answers = puzzle.words.map(w => w.word);
+                
                 const res = await axios.post('/api/submit-result', {
                     puzzle_id: puzzle.id,
+                    answers: answers,
                     time_taken: timeTaken,
                     hints_used: hintsUsed
                 }, { headers: { Authorization: `Bearer ${token}` } });
                 setResult(res.data);
-            } catch (e) { console.error(e); } finally { setIsSubmitting(false); }
+            } catch (e) { 
+                console.error(e);
+                if (e.response?.data?.message) {
+                    alert('Error: ' + e.response.data.message);
+                }
+            } finally { setIsSubmitting(false); }
         }
     };
 
@@ -278,8 +305,29 @@ export default function Player() {
         setShuffleKey(prev => prev + 1);
     };
 
-    const useHint = () => {
+    const useHint = async () => {
         if (solved) return;
+        if (hintsRemaining <= 0) {
+            alert('Maximum hints reached (2/2) for this level!');
+            return;
+        }
+
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('admin_token');
+        
+        // Call API to register hint usage if logged in
+        if (token) {
+            try {
+                await axios.post('/api/use-hint', {
+                    puzzle_id: puzzle.id
+                }, { headers: { Authorization: `Bearer ${token}` } });
+            } catch (error) {
+                if (error.response?.status === 400) {
+                    alert(error.response.data.message);
+                    return;
+                }
+            }
+        }
+
         const unrevealed = [];
         puzzle.grid.forEach((row, y) => {
             row.forEach((cell, x) => {
@@ -296,6 +344,7 @@ export default function Player() {
             const rand = unrevealed[Math.floor(Math.random() * unrevealed.length)];
             setHintedCells(prev => [...prev, rand]);
             setHintsUsed(prev => prev + 1);
+            setHintsRemaining(prev => prev - 1);
         }
     };
 
@@ -407,8 +456,14 @@ export default function Player() {
                         Level {puzzle.level}
                     </div>
 
-                    <button className="cq-hint-btn" onClick={useHint}>
+                    <button 
+                        className={`cq-hint-btn ${hintsRemaining <= 0 ? 'disabled' : ''}`} 
+                        onClick={useHint}
+                        disabled={hintsRemaining <= 0}
+                        title={`Hints: ${hintsRemaining}/${maxHints}`}
+                    >
                         💡
+                        <span className="hint-badge">{hintsRemaining}</span>
                     </button>
                 </header>
 
@@ -728,9 +783,34 @@ export default function Player() {
                     cursor: pointer; font-size: 1rem;
                     box-shadow: 0 3px 12px rgba(245,158,11,0.35);
                     transition: all 0.2s;
+                    position: relative;
                 }
                 .cq-hint-btn:hover { transform: scale(1.08); }
                 .cq-hint-btn:active { transform: scale(0.92); }
+                .cq-hint-btn.disabled {
+                    background: linear-gradient(135deg, #9CA3AF, #6B7280);
+                    cursor: not-allowed;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                }
+                .cq-hint-btn.disabled:hover { transform: none; }
+                .hint-badge {
+                    position: absolute;
+                    top: -4px; right: -4px;
+                    min-width: 16px; height: 16px;
+                    background: #10B981;
+                    color: white;
+                    font-size: 0.65rem;
+                    font-weight: 700;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 4px;
+                    border: 1.5px solid white;
+                }
+                .cq-hint-btn.disabled .hint-badge {
+                    background: #EF4444;
+                }
 
                 /* ===== CLUE ===== */
                 .cq-clue-strip {
