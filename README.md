@@ -58,6 +58,14 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 
 ---
 
+## 🎬 Video Demo
+
+> 📹 **Video demo tersedia di folder `public/screenshots/demo-video.mp4`** (tidak di-upload ke GitHub karena ukuran file > 100MB).
+> 
+> Untuk melihat demo, clone repository dan buka file video secara lokal, atau hubungi developer untuk link Google Drive/YouTube.
+
+---
+
 ## 🚀 Tech Stack & Arsitektur
 
 - **Backend / API Server:** Laravel 11 (PHP 8.2+), ekosistem REST API.
