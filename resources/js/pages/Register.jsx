@@ -19,6 +19,8 @@ export default function Register() {
                 localStorage.setItem('auth_token', res.data.token);
                 localStorage.setItem('user_name', res.data.user.name);
                 localStorage.setItem('user_role', 'player');
+                // Clear guest progress when registering (new user starts fresh)
+                localStorage.removeItem('guest_completed_levels');
                 // Ensure no admin_token for regular registration
                 localStorage.removeItem('admin_token');
                 navigate('/');

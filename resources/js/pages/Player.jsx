@@ -232,17 +232,21 @@ export default function Player() {
         setSolved(true);
         const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
-        // Save completed level to localStorage (works without login)
-        try {
-            const completed = JSON.parse(localStorage.getItem('completed_levels') || '[]');
-            const lvl = parseInt(level);
-            if (!completed.includes(lvl)) {
-                completed.push(lvl);
-                localStorage.setItem('completed_levels', JSON.stringify(completed));
-            }
-        } catch (e) { console.error(e); }
-
         const token = localStorage.getItem('auth_token') || localStorage.getItem('admin_token');
+
+        // Save completed level to localStorage ONLY for guest users (not logged in)
+        if (!token) {
+            try {
+                const completed = JSON.parse(localStorage.getItem('guest_completed_levels') || '[]');
+                const lvl = parseInt(level);
+                if (!completed.includes(lvl)) {
+                    completed.push(lvl);
+                    localStorage.setItem('guest_completed_levels', JSON.stringify(completed));
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Logged-in users: submit to API
         if (token) {
             setIsSubmitting(true);
             try {

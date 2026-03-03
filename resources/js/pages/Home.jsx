@@ -9,6 +9,9 @@ export default function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Cleanup old localStorage key (migration from old version)
+        localStorage.removeItem('completed_levels');
+
         const token = localStorage.getItem('auth_token') || localStorage.getItem('admin_token');
         if (token) {
             axios.get('/api/user', { headers: { Authorization: `Bearer ${token}` } })
@@ -39,23 +42,31 @@ export default function Home() {
         window.location.reload();
     };
 
-    // Check both API data and localStorage for completed levels
+    // Check completed levels - separate logic for logged-in vs guest users
     let maxUnlockedLevel = 1;
-    const localCompleted = (() => {
-        try { return JSON.parse(localStorage.getItem('completed_levels') || '[]'); }
-        catch { return []; }
-    })();
+    const isLoggedIn = !!user;
 
     if (puzzles.length > 0) {
-        const apiCompleted = puzzles.filter(p => p.is_completed).map(p => p.level);
-        const allCompleted = [...new Set([...apiCompleted, ...localCompleted])];
-        if (allCompleted.length > 0) {
-            maxUnlockedLevel = Math.max(...allCompleted) + 1;
+        if (isLoggedIn) {
+            // Logged-in users: ONLY use API data from database (ignore localStorage)
+            const apiCompleted = puzzles.filter(p => p.is_completed).map(p => p.level);
+            if (apiCompleted.length > 0) {
+                maxUnlockedLevel = Math.max(...apiCompleted) + 1;
+            }
+        } else {
+            // Guest users: ONLY use guest-specific localStorage
+            const guestCompleted = (() => {
+                try { return JSON.parse(localStorage.getItem('guest_completed_levels') || '[]'); }
+                catch { return []; }
+            })();
+            if (guestCompleted.length > 0) {
+                maxUnlockedLevel = Math.max(...guestCompleted) + 1;
+            }
+            // Mark puzzles completed from guest localStorage
+            puzzles.forEach(p => {
+                if (guestCompleted.includes(p.level)) p.is_completed = true;
+            });
         }
-        // Mark puzzles completed from localStorage too
-        puzzles.forEach(p => {
-            if (localCompleted.includes(p.level)) p.is_completed = true;
-        });
     }
 
     return (

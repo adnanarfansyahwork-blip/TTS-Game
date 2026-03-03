@@ -22,6 +22,9 @@ export default function Login() {
                 localStorage.setItem('user_name', res.data.user.name);
                 localStorage.setItem('user_role', res.data.role || res.data.user.role || 'player');
 
+                // Clear guest progress when logging in (user has their own progress in database)
+                localStorage.removeItem('guest_completed_levels');
+
                 // Only store admin_token if user is actually admin
                 if (res.data.role === 'admin' || res.data.user.role === 'admin') {
                     localStorage.setItem('admin_token', res.data.token);
