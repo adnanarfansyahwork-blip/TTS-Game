@@ -73,7 +73,11 @@ Aplikasi ini dibuat sebagai pemenuhan tes *Software Engineer*, mencakup **Admin 
 ### Langkah-langkah:
 
 **1. Clone atau Ekstrak Repository Project**
-Arahkan Terminal/Command Prompt ke dalam folder root project.
+Jalankan perintah clone berikut di Terminal/Command Prompt untuk mengunduh source code (atau sedot via file .zip):
+```bash
+git clone https://github.com/adnanarfansyahwork-blip/TTS-Game.git
+cd TTS-Game
+```
 
 **2. Setup Backend (Laravel)**
 Jalankan perintah berikut berurutan di terminal:
